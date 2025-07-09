@@ -292,6 +292,27 @@ if (count($arrayRutas) === 3
 }
 
 
+if (
+    $_SERVER['REQUEST_METHOD'] === 'GET' &&
+    ($_GET['ruta'] ?? '') === 'video'
+) {
+    require_once 'controladores/youtube.controlador.php';
+    header('Content-Type: application/json');
+
+    if (empty($_GET['q'])) {
+        echo json_encode(['error' => 'Parámetro "q" requerido']);
+        exit;
+    }
+
+    $resultado = YoutubeControlador::obtenerVideo($_GET['q']);
+    echo json_encode($resultado);
+    exit;
+}
+
+
+
+
+
 
 
 ?>
