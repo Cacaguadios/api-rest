@@ -9,6 +9,22 @@ class ModeloClientes{
 	Mostrar todos los registros
 	=============================================*/
 
+    
+     // Devuelve el id_cliente si las credenciales son válidas, o false si no.
+    static public function autenticar($user, $pass) {
+        $creds = base64_encode("$user:$pass");
+        // index devuelve todos los clientes; el segundo parámetro(true) salta paginación
+        $clientes = self::index("clientes", true);
+
+        foreach ($clientes as $c) {
+            $dbCreds = base64_encode($c['id_cliente'] . ":" . $c['llave_secreta']);
+            if (hash_equals($creds, $dbCreds)) {  // comparación en tiempo constante
+                return (int)$c['id'];
+            }
+        }
+        return false;
+    }
+
     static public function index($tabla){
 
         $stmt=Conexion::conectar()->prepare("SELECT * FROM $tabla");

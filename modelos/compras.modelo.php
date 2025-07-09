@@ -20,28 +20,38 @@ class ModeloCompras {
     // Crear un ticket de compra
     static public function createCompra($tabla, $id_cliente, $id_metodo_pago = null) {
         try {
-            $stmt = Conexion::conectar()->prepare(
-                "INSERT INTO $tabla (id_cliente, id_metodo_pago) 
-                VALUES (:id_cliente, :id_metodo_pago)"
-            );
+            // 1) Abre la conexión una sola vez
+            $db = Conexion::conectar();
 
+            // 2) Prepara la inserción
+            $sql = "INSERT INTO $tabla (id_cliente, id_metodo_pago) VALUES (:id_cliente, :id_metodo_pago)";
+            $stmt = $db->prepare($sql);
+
+            // 3) Bindea el método de pago correctamente (null → PDO::PARAM_NULL)
             $stmt->bindParam(":id_cliente", $id_cliente, PDO::PARAM_INT);
-            $stmt->bindParam(":id_metodo_pago", $id_metodo_pago, PDO::PARAM_INT);
-
-            if ($stmt->execute()) {
-                $lastId = Conexion::conectar()->lastInsertId();
-                error_log("✅ Compra creada con ID: $lastId");
-                return (int)$lastId;
+            if ($id_metodo_pago !== null) {
+                $stmt->bindValue(":id_metodo_pago", $id_metodo_pago, PDO::PARAM_INT);
             } else {
-                $errorInfo = $stmt->errorInfo();
-                error_log("❌ ERROR SQL (createCompra): " . implode(" | ", $errorInfo));
+                $stmt->bindValue(":id_metodo_pago", null, PDO::PARAM_NULL);
+            }
+
+            // 4) Ejecuta y, si va bien, recupera el ID de esa **misma** conexión
+            if ($stmt->execute()) {
+                $lastId = (int) $db->lastInsertId();
+                error_log("✅ Compra creada con ID: $lastId");
+                return $lastId;
+            } else {
+                $error = implode(" | ", $stmt->errorInfo());
+                error_log("❌ ERROR SQL (createCompra): $error");
                 return "error";
             }
+
         } catch (PDOException $e) {
             error_log("❌ EXCEPCIÓN: " . $e->getMessage());
             return "error";
         }
     }
+
 
 
     // Insertar detalle de compra (curso comprado)

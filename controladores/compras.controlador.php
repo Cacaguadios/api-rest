@@ -28,8 +28,22 @@ class ControladorCompras {
                         return;
                     }
 
+
+                    // Dentro de ControladorCompras::create()
+                    $id_metodo_pago = $json['id_metodo_pago'] ?? null;
+                    if ($id_metodo_pago !== null) {
+                        if (!ModeloMetodosPago::validar("metodos_pago", $id_metodo_pago, $id_cliente)) {
+                            echo json_encode([
+                                "status"=>400,
+                                "detalle"=>"Método de pago no válido"
+                            ]);
+                            return;
+                        }
+                    }
+
                     // Crear el ticket de compra
-                    $id_compra = ModeloCompras::createCompra("compras", $id_cliente, null);
+                    $id_compra = ModeloCompras::createCompra("compras", $id_cliente, $id_metodo_pago);
+
 
                     if (!is_numeric($id_compra)) {
                         echo json_encode([

@@ -265,6 +265,31 @@ if (count($arrayRutas) == 3 && $arrayRutas[0] == "api-rest" && $arrayRutas[1] ==
     }
 }
 
+// /api-rest/metodos-pago  → GET, POST
+if ($arrayRutas[0]==='api-rest' && $arrayRutas[1]==='metodos-pago') {
+    $ctrl = new ControladorMetodosPago();
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        $ctrl->index();
+        return;
+    }
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $ctrl->create();
+        return;
+    }
+}
+
+// /api-rest/metodos-pago/{id} → DELETE
+if (count($arrayRutas) === 3 
+    && $arrayRutas[0] === 'api-rest' 
+    && $arrayRutas[1] === 'metodos-pago') {
+    
+    $id = intval($arrayRutas[2]);
+    if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+        $ctrl = new ControladorMetodosPago();
+        $ctrl->delete($id);
+        return;
+    }
+}
 
 
 
